@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using ClubSquad.Data;
 using ClubSquad.Dto;
+using ClubSquad.Interfaces;
 using ClubSquad.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace ClubSquad.Controllers
 {
@@ -14,25 +16,27 @@ namespace ClubSquad.Controllers
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly IPlayerRepository _playerRepository;
 
-        public PlayerController(DataContext context,IMapper mapper)
+        public PlayerController(DataContext context,IMapper mapper, IPlayerRepository playerRepository)
         {
             _context = context;
             _mapper = mapper;
+            _playerRepository = playerRepository;
         }
 
         [HttpGet]
-        public ActionResult<PlayerDto> Get()
+        public IActionResult Get()
         {
-            var playerData = _context.Players.ToList();
-            var player = _mapper.Map<List<PlayerDto>>(playerData);
+            var playerData = _playerRepository.GetPlayer();
+            var player = _mapper.Map<List<PlayerResponse>>(playerData);
             return Ok(player);
         }
         [HttpGet("{id}")]
-        public ActionResult<PlayerDto> Get(int id)
+        public IActionResult Get(int id)
         {
-            var playerId = _context.Players.Where(n => n.Id == id).FirstOrDefault();
-            var player = _mapper.Map<PlayerDto>(playerId);
+            var playerId = _playerRepository.GetPlayers(id);
+            var player = _mapper.Map<PlayerResponse>(playerId);
 
 
             if (!ModelState.IsValid)
@@ -44,43 +48,41 @@ namespace ClubSquad.Controllers
         }
 
         [HttpPost]
-        public ActionResult<PlayerDto> Create(PlayerDto playerDto)
+        public IActionResult Create([FromBody]PlayerResponse playerDto)
         {
-            Player player = new Player();
-            player.Name = playerDto.Name;
-            player.Surname = playerDto.Surname;
-            player.Age = playerDto.Age;
-            player.TeamId = playerDto.TeamId;
-
-            _context.Players.Add(player);
-            _context.SaveChanges();
-            return Ok(_context.Players.ToList());
+            var playerMap = _mapper.Map<Player>(playerDto);
+            _playerRepository.CreatePlayer(playerMap);
+            return Ok(playerMap);
         }
         [HttpPut]
-        public ActionResult<PlayerDto> Update(PlayerDto playerDto, int id)
+        public IActionResult Update([FromBody]PlayerDto playerDto, int id)
         {
-            Player player = _context.Players.Find(id);
-            player.Name = playerDto.Name;
-            player.Surname = playerDto.Surname;
-            player.Age = playerDto.Age;
+            if (playerDto is null)
+            {
+                return BadRequest("bad");
+            }
 
-            _context.SaveChanges();
-            return Ok(playerDto);
+            if (id != playerDto.Id)
+            {
+                return BadRequest("Not found");
+            }
+
+            var playerMap = _mapper.Map<Player>(playerDto);
+
+            if (!_playerRepository.UpdatePlayer(playerMap))
+            {
+                return BadRequest("bad");
+            }
+
+            return Ok(playerMap);
         }
 
         [HttpDelete]
-        public ActionResult<PlayerDto> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            PlayerDto playerDto = new PlayerDto();
-            Player player = _context.Players.Find(id);
-
-            playerDto.Name = player.Name;
-            playerDto.Surname = player.Surname;
-            playerDto.Age = player.Age;
-
-            _context.Players.Remove(player);
-            _context.SaveChanges();
-            return Ok(playerDto);
+            var player = _playerRepository.GetPlayers(id);
+            _playerRepository.DeletePlayer(player);
+            return Ok(player);
         }
     }
 }

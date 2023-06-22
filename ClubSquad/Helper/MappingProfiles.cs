@@ -9,10 +9,14 @@ namespace ClubSquad.Helper
         public MappingProfiles()
         {
             CreateMap<Player, PlayerDto>();
+            CreateMap<PlayerDto, Player>();
             CreateMap<Team, TeamDto>();
             CreateMap<TeamDto, Team>();
             CreateMap<Team, TeamResponse>();
             CreateMap<TeamResponse, Team>();
+            CreateMap<Player, PlayerResponse>();
+            CreateMap<PlayerResponse, Player>();
+
         }
     }
 }

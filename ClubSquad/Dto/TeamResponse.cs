@@ -6,6 +6,6 @@ namespace ClubSquad.Dto
     {
         public string Name { get; set; }
         public int Salary { get; set; }
-        public ICollection<PlayerDto> Players { get; set; }
+        public ICollection<PlayerResponse> Players { get; set; }
     }
 }

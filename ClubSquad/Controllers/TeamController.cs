@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using ClubSquad.Data;
 using ClubSquad.Dto;
+using ClubSquad.Interfaces;
 using ClubSquad.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 
 namespace ClubSquad.Controllers
 {
@@ -14,25 +16,27 @@ namespace ClubSquad.Controllers
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly ITeamRepository _teamRepository;
 
-        public TeamController(DataContext context, IMapper mapper)
+        public TeamController(DataContext context, IMapper mapper, ITeamRepository teamRepository)
         {
             _context = context;
             _mapper = mapper;
+            _teamRepository = teamRepository;
         }
 
         [HttpGet]
-        public ActionResult GetAll()
+        public IActionResult GetAll()
         {
-            var teamData = _context.Teams.Include(n => n.Players).ToList();
+            var teamData = _teamRepository.GetTeams();
             var team = _mapper.Map<List<TeamResponse>>(teamData);
             return Ok(team);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<TeamResponse> Get(int id)
+        public IActionResult Get(int id)
         {
-            var teamData = _context.Teams.Include(_n => _n.Players).Where(n => n.Id == id).FirstOrDefault();
+            var teamData = _teamRepository.GetTeam(id);
             var team = _mapper.Map<TeamResponse>(teamData);
             return Ok(team);
         }
@@ -41,34 +45,31 @@ namespace ClubSquad.Controllers
         public IActionResult Create([FromBody] TeamDto teamDto)
         {
             var newTeam = _mapper.Map<Team>(teamDto);
-            _context.Teams.Add(newTeam);
-            _context.SaveChanges();
+            var team = _teamRepository.CreateTeam(newTeam);
 
-            return Created($"/{newTeam.Id}", newTeam);
+            return Ok(newTeam);
         }
 
         [HttpPut("{id}")]
         public IActionResult Update(int id, [FromBody] TeamDto teamDto)
         {
-            var team = _context.Teams.Find(id);
-            // var updateTeam = _mapper.Map<Team>(team);
-            team.Name = teamDto.Name;
-            team.Salary = teamDto.Salary;
-            _context.Teams.Update(team);
-            _context.SaveChanges();
+            if (id != teamDto.Id)
+            {
+                return BadRequest("not eyni");
+            }
 
-            return Ok(team);
+            var teamMap = _mapper.Map<Team>(teamDto);
+
+
+            return Ok(teamMap);
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            Team player = _context.Teams.Find(id);
-            var newTeam = _mapper.Map<Team>(player);
-
-            _context.Teams.Remove(player);
-            _context.SaveChanges();
-            return Ok(newTeam);
+            var team = _teamRepository.GetTeam(id);
+            _teamRepository.DeleteTeam(team);
+            return Ok(team);
         }
     }
 }
