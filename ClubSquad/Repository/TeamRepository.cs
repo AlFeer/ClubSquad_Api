@@ -13,37 +13,31 @@ namespace ClubSquad.Repository
         {
             _context = context;
         }
-        public ICollection<Team> GetTeams()
+        public async Task<ICollection<Team>> GetTeams()
         {
-            return _context.Teams.Include(n => n.Players).ToList();
+            return await _context.Teams.Include(n => n.Players).ToListAsync();
         }
 
-        public Team GetTeam(int id)
+        public async Task<Team> GetTeam(int id)
         {
-            return _context.Teams.Include(_n => _n.Players).Where(n => n.Id == id).FirstOrDefault();
+            return await _context.Teams.Include(_n => _n.Players).Where(n => n.Id == id).FirstOrDefaultAsync();
         }
 
-        public bool CreateTeam(Team team)
+        public async Task CreateTeam(Team team)
         {
             _context.Add(team);
-            return Save();
+            await _context.SaveChangesAsync();
         }
-        public bool UpdateTeam(Team team)
+        public async Task UpdateTeam(Team team)
         {
             _context.Update(team);
-            return Save();
+            await _context.SaveChangesAsync();
         }
 
-        public bool DeleteTeam(Team team)
+        public async Task DeleteTeam(Team team)
         {
             _context.Remove(team);
-            return Save();
+            await _context.SaveChangesAsync();
         }
-        public bool Save()
-        {
-            var saved = _context.SaveChanges();
-            return saved > 0 ? true : false;
-        }
-
     }
 }

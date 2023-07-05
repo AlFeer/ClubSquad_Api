@@ -4,11 +4,10 @@ namespace ClubSquad.Interfaces
 {
     public interface IPlayerRepository
     {
-        ICollection<Player> GetPlayer();
-        Player GetPlayers(int id);
-        bool CreatePlayer(Player player);
-        bool UpdatePlayer(Player player);
-        bool DeletePlayer(Player player);
-        bool Save();
+        Task<ICollection<Player>> GetPlayer();
+        Task<Player> GetPlayers(int id);
+        Task CreatePlayer(Player player);
+        Task UpdatePlayer(Player player);
+        Task DeletePlayer(Player player);
     }
 }

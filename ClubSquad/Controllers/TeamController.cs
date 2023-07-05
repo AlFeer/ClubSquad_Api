@@ -26,49 +26,48 @@ namespace ClubSquad.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<ActionResult> GetAll()
         {
-            var teamData = _teamRepository.GetTeams();
+            var teamData = await _teamRepository.GetTeams();
             var team = _mapper.Map<List<TeamResponse>>(teamData);
             return Ok(team);
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<ActionResult> Get(int id)
         {
-            var teamData = _teamRepository.GetTeam(id);
+            var teamData = await _teamRepository.GetTeam(id);
             var team = _mapper.Map<TeamResponse>(teamData);
             return Ok(team);
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] TeamDto teamDto)
+        public async Task<ActionResult> Create([FromBody] TeamDto teamDto)
         {
             var newTeam = _mapper.Map<Team>(teamDto);
-            var team = _teamRepository.CreateTeam(newTeam);
+            await _teamRepository.CreateTeam(newTeam);
 
             return Ok(newTeam);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] TeamDto teamDto)
+        public async Task<ActionResult> Update(int id, [FromBody] TeamDto teamDto)
         {
             if (id != teamDto.Id)
             {
-                return BadRequest("not eyni");
+                return BadRequest();
             }
-
             var teamMap = _mapper.Map<Team>(teamDto);
-
+            await _teamRepository.UpdateTeam(teamMap);
 
             return Ok(teamMap);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var team = _teamRepository.GetTeam(id);
-            _teamRepository.DeleteTeam(team);
+            var team = await _teamRepository.GetTeam(id);
+            await _teamRepository.DeleteTeam(team);
             return Ok(team);
         }
     }

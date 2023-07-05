@@ -26,16 +26,16 @@ namespace ClubSquad.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<ActionResult> Get()
         {
-            var playerData = _playerRepository.GetPlayer();
+            var playerData = await _playerRepository.GetPlayer();
             var player = _mapper.Map<List<PlayerResponse>>(playerData);
             return Ok(player);
         }
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<ActionResult> Get(int id)
         {
-            var playerId = _playerRepository.GetPlayers(id);
+            var playerId = await _playerRepository.GetPlayers(id);
             var player = _mapper.Map<PlayerResponse>(playerId);
 
 
@@ -48,14 +48,14 @@ namespace ClubSquad.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody]PlayerResponse playerDto)
+        public async Task<ActionResult> Create([FromBody]PlayerResponse playerDto)
         {
             var playerMap = _mapper.Map<Player>(playerDto);
-            _playerRepository.CreatePlayer(playerMap);
+            await _playerRepository.CreatePlayer(playerMap);
             return Ok(playerMap);
         }
         [HttpPut]
-        public IActionResult Update([FromBody]PlayerDto playerDto, int id)
+        public async Task<ActionResult> Update([FromBody]PlayerDto playerDto, int id)
         {
             if (playerDto is null)
             {
@@ -69,19 +69,16 @@ namespace ClubSquad.Controllers
 
             var playerMap = _mapper.Map<Player>(playerDto);
 
-            if (!_playerRepository.UpdatePlayer(playerMap))
-            {
-                return BadRequest("bad");
-            }
-
+            await _playerRepository.UpdatePlayer(playerMap);
+           
             return Ok(playerMap);
         }
 
         [HttpDelete]
-        public IActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var player = _playerRepository.GetPlayers(id);
-            _playerRepository.DeletePlayer(player);
+            var player = await _playerRepository.GetPlayers(id);
+            await _playerRepository.DeletePlayer(player);
             return Ok(player);
         }
     }

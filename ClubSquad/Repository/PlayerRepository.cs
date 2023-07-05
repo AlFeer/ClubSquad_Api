@@ -1,6 +1,8 @@
 ﻿using ClubSquad.Data;
 using ClubSquad.Interfaces;
 using ClubSquad.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClubSquad.Repository
 {
@@ -13,36 +15,30 @@ namespace ClubSquad.Repository
             _context = context;
         }
 
-        public ICollection<Player> GetPlayer()
+        public async Task<ICollection<Player>> GetPlayer()
         {
-            return _context.Players.ToList();
+            return await _context.Players.ToListAsync();
         }
 
-        public Player GetPlayers(int id)
+        public async Task<Player> GetPlayers(int id)
         {
-            return _context.Players.Where(n => n.Id == id).FirstOrDefault();
+            return await _context.Players.Where(n => n.Id == id).FirstOrDefaultAsync();
         }
 
-        public bool CreatePlayer(Player player)
+        public async Task CreatePlayer(Player player)
         {
             _context.Players.Add(player);
-            return Save();
+            await _context.SaveChangesAsync();
         }
-        public bool UpdatePlayer(Player player)
+        public async Task UpdatePlayer(Player player)
         {
             _context.Update(player);
-            return Save();
+            await _context.SaveChangesAsync();
         }
-        public bool DeletePlayer(Player player)
+        public async Task DeletePlayer(Player player)
         {
             _context.Players.Remove(player);
-            return Save();
-        }
-
-        public bool Save()
-        {
-            var saved = _context.SaveChanges();
-            return saved > 0 ? true : false;
+            await _context.SaveChangesAsync();
         }
     }
 }

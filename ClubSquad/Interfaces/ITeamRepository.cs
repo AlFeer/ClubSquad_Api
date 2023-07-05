@@ -4,11 +4,10 @@ namespace ClubSquad.Interfaces
 {
     public interface ITeamRepository
     {
-        ICollection<Team> GetTeams();
-        Team GetTeam(int id);
-        bool CreateTeam(Team team);
-        bool UpdateTeam(Team team);
-        bool DeleteTeam(Team team);
-        bool Save();
+        Task<ICollection<Team>> GetTeams();
+        Task<Team> GetTeam(int id);
+        Task CreateTeam(Team team);
+        Task UpdateTeam(Team team);
+        Task DeleteTeam(Team team);
     }
 }
